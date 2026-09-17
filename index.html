@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio Canvas Ultra Pro - Animated Edition</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --panel-bg: #1e293b;
+            --panel-active: #334155;
+            --accent-color: #6366f1;
+            --text-light: #f8fafc;
+            --border-color: #334155;
+            --canvas-bg: #ffffff;
+            --icon-color: #94a3b8;
+        }
+
+        body.light-mode {
+            --bg-dark: #f1f5f9;
+            --panel-bg: #ffffff;
+            --panel-active: #e2e8f0;
+            --accent-color: #4f46e5;
+            --text-light: #1e293b;
+            --border-color: #e2e8f0;
+            --icon-color: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            height: 60px;
+            background-color: var(--panel-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1rem;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .action-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        button {
+            background-color: var(--panel-bg);
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        button:hover {
+            background-color: var(--panel-active);
+            border-color: var(--accent-color);
+        }
+
+        button.primary {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+        }
+
+        button.primary:hover {
+            background-color: #4f46e5;
+        }
+
+        .workspace {
+            display: flex;
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .toolbar {
+            width: 68px;
+            background-color: var(--panel-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px 0;
+            gap: 10px;
+            z-index: 5;
+            overflow-y: auto;
+        }
+
+        .tool-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            color: var(--icon-color);
+            font-size: 1.2rem;
+            transition: 0.2s;
+        }
+
+        .tool-btn:hover {
+            background-color: var(--panel-active);
+            color: var(--text-light);
+        }
+
+        .tool-btn.active {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .canvas-viewport {
+            flex: 1;
+            background-color: #050811;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #canvasWrapper {
+            position: relative;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            transform-origin: 0 0;
+        }
+
+        canvas {
+            background-color: #ffffff;
+            display: block;
+            cursor: crosshair;
+        }
+
+        .viewport-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 88px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(6px);
+            padding: 8px 16px;
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #94a3b8;
+            font-size: 0.8rem;
+            z-index: 6;
+        }
+
+        .properties-panel {
+            width: 310px;
+            background-color: var(--panel-bg);
+            border-left: 1px solid var(--border-color);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+            z-index: 5;
+        }
+
+        .panel-section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--icon-color);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .palette-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 6px;
+        }
+
+        .color-swatch {
+            aspect-ratio: 1;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.1s;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.15);
+        }
+
+        .color-swatch.active {
+            border-color: var(--text-light);
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent-color);
+        }
+
+        select, input[type="file"] {
+            width: 100%;
+            background-color: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            padding: 8px;
+            border-radius: 6px;
+        }
+
+        .upload-btn-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .upload-btn-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Studio Canvas Pro
+        </div>
+        <div class="action-group">
+            <button id="undoBtn" title="Undo"><i class="fa-solid fa-rotate-left"></i> Undo</button>
+            <button id="redoBtn" title="Redo"><i class="fa-solid fa-rotate-right"></i> Redo</button>
+            <button id="clearBtn"><i class="fa-solid fa-trash"></i> Clear</button>
+            <button id="exportBtn" class="primary"><i class="fa-solid fa-download"></i> Export PNG</button>
+        </div>
+    </header>
+
+    <div class="workspace">
+        
+        <div class="toolbar">
+            <button class="tool-btn active" title="Pencil" data-tool="pencil"><i class="fa-solid fa-pencil"></i></button>
+            <button class="tool-btn" title="Brush" data-tool="brush"><i class="fa-solid fa-paint-brush"></i></button>
+            <button class="tool-btn" title="Neon Glow (Anim)" data-tool="neon"><i class="fa-solid fa-bolt"></i></button>
+            <button class="tool-btn" title="Particles (Anim)" data-tool="particles"><i class="fa-solid fa-snowflake"></i></button>
+            <button class="tool-btn" title="Rainbow Brush" data-tool="rainbow"><i class="fa-solid fa-rainbow"></i></button>
+            <button class="tool-btn" title="Eraser" data-tool="eraser"><i class="fa-solid fa-eraser"></i></button>
+            <button class="tool-btn" title="Text" data-tool="text"><i class="fa-solid fa-font"></i></button>
+            <button class="tool-btn" title="Line" data-tool="line"><i class="fa-solid fa-minus"></i></button>
+            <button class="tool-btn" title="Rectangle" data-tool="rectangle"><i class="fa-regular fa-square"></i></button>
+            <button class="tool-btn" title="Circle" data-tool="circle"><i class="fa-regular fa-circle"></i></button>
+        </div>
+
+        <div class="canvas-viewport" id="viewport">
+            <div id="canvasWrapper">
+                <canvas id="mainCanvas" width="900" height="600"></canvas>
+            </div>
+            
+            <div class="viewport-controls">
+                <span id="coordInfo">X: 0, Y: 0</span>
+                <span>Canvas: 900x600</span>
+            </div>
+        </div>
+
+        <aside class="properties-panel">
+            
+            <div>
+                <div class="panel-section-title">Image Import</div>
+                <div class="upload-btn-wrapper">
+                    <button class="primary" style="width:100%; justify-content:center;"><i class="fa-solid fa-image"></i> Add Image to Canvas</button>
+                    <input type="file" id="imageLoader" accept="image/*">
+                </div>
+            </div>
+
+            <div>
+                <div class="panel-section-title">Color Palette</div>
+                <div class="palette-grid">
+                    <div class="color-swatch active" style="background-color: #000000;" data-color="#000000"></div>
+                    <div class="color-swatch" style="background-color: #ffffff;" data-color="#ffffff"></div>
+                    <div class="color-swatch" style="background-color: #ef4444;" data-color="#ef4444"></div>
+                    <div class="color-swatch" style="background-color: #f97316;" data-color="#f97316"></div>
+                    <div class="color-swatch" style="background-color: #f59e0b;" data-color="#f59e0b"></div>
+                    <div class="color-swatch" style="background-color: #10b981;" data-color="#10b981"></div>
+                    <div class="color-swatch" style="background-color: #06b6d4;" data-color="#06b6d4"></div>
+                    <div class="color-swatch" style="background-color: #3b82f6;" data-color="#3b82f6"></div>
+                    <div class="color-swatch" style="background-color: #6366f1;" data-color="#6366f1"></div>
+                    <div class="color-swatch" style="background-color: #8b5cf6;" data-color="#8b5cf6"></div>
+                    <div class="color-swatch" style="background-color: #ec4899;" data-color="#ec4899"></div>
+                    <div class="color-swatch" style="background-color: #64748b;" data-color="#64748b"></div>
+                </div>
+                <div style="margin-top:10px; display:flex; align-items:center; gap:10px;">
+                    <input type="color" id="customColor" value="#6366f1" style="width:40px; height:40px; border:none; cursor:pointer;">
+                    <span>Custom Picker</span>
+                </div>
+            </div>
+
+            <div>
+                <div class="panel-section-title">Brush Controls</div>
+                <div class="control-group">
+                    <label>Size: <span id="strokeWidthVal">6px</span></label>
+                    <input type="range" id="strokeWidth" min="1" max="60" value="6">
+                </div>
+            </div>
+
+        </aside>
+
+    </div>
+
+    <script>
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let isDrawing = false;
+        let currentTool = 'pencil';
+        let currentColor = '#000000';
+        let strokeWidth = 6;
+        let hue = 0; // For rainbow brush
+
+        // History Setup
+        let history = [];
+        let historyIndex = -1;
+
+        function saveState() {
+            if (historyIndex < history.length - 1) {
+                history = history.slice(0, historyIndex + 1);
+            }
+            history.push(canvas.toDataURL());
+            historyIndex++;
+        }
+
+        // Initialize white background
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        saveState();
+
+        // Tool Selection
+        document.querySelectorAll('.tool-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelector('.tool-btn.active')?.classList.remove('active');
+                btn.classList.add('active');
+                currentTool = btn.dataset.tool;
+            });
+        });
+
+        // Color Selection
+        document.querySelectorAll('.color-swatch').forEach(swatch => {
+            swatch.addEventListener('click', () => {
+                document.querySelector('.color-swatch.active')?.classList.remove('active');
+                swatch.classList.add('active');
+                currentColor = swatch.dataset.color;
+            });
+        });
+
+        document.getElementById('customColor').addEventListener('input', (e) => {
+            currentColor = e.target.value;
+        });
+
+        document.getElementById('strokeWidth').addEventListener('input', (e) => {
+            strokeWidth = e.target.value;
+            document.getElementById('strokeWidthVal').innerText = strokeWidth + 'px';
+        });
+
+        // Coordinate Display
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.round(e.clientX - rect.left);
+            const y = Math.round(e.clientY - rect.top);
+            document.getElementById('coordInfo').innerText = `X: ${x}, Y: ${y}`;
+        });
+
+        // Drawing Mechanics
+        canvas.addEventListener('mousedown', (e) => {
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+
+            if (currentTool === 'text') {
+                const text = prompt("Enter text:");
+                if (text) {
+                    ctx.fillStyle = currentColor;
+                    ctx.font = `${strokeWidth * 3}px Inter, sans-serif`;
+                    ctx.fillText(text, x, y);
+                    saveState();
+                }
+                isDrawing = false;
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            ctx.lineWidth = strokeWidth;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            if (currentTool === 'eraser') {
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            } else if (currentTool === 'pencil' || currentTool === 'brush') {
+                ctx.strokeStyle = currentColor;
+                ctx.shadowBlur = 0;
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            } else if (currentTool === 'neon') {
+                // Neon Animated Effect
+                ctx.strokeStyle = currentColor;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = currentColor;
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            } else if (currentTool === 'particles') {
+                // Animated Particle Effect
+                ctx.shadowBlur = 0;
+                for (let i = 0; i < 5; i++) {
+                    const px = x + (Math.random() - 0.5) * strokeWidth * 2;
+                    const py = y + (Math.random() - 0.5) * strokeWidth * 2;
+                    ctx.fillStyle = currentColor;
+                    ctx.beginPath();
+                    ctx.arc(px, py, Math.random() * 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            } else if (currentTool === 'rainbow') {
+                // Rainbow dynamic brush
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = `hsl(${hue}, 100%, 50%)`;
+                hue = (hue + 2) % 360;
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            if (isDrawing) {
+                isDrawing = false;
+                ctx.shadowBlur = 0; // Reset shadow glow
+                saveState();
+            }
+        });
+
+        // Image Loader (Add Image to Canvas)
+        document.getElementById('imageLoader').addEventListener('change', (e) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    // Draw image centered
+                    const x = (canvas.width - img.width) / 2;
+                    const y = (canvas.height - img.height) / 2;
+                    ctx.drawImage(img, x > 0 ? x : 0, y > 0 ? y : 0, Math.min(img.width, canvas.width), Math.min(img.height, canvas.height));
+                    saveState();
+                };
+                img.src = event.target.result;
+            };
+            if (e.target.files[0]) {
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+
+        // Undo & Redo
+        document.getElementById('undoBtn').addEventListener('click', () => {
+            if (historyIndex > 0) {
+                historyIndex--;
+                let img = new Image();
+                img.onload = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0);
+                };
+                img.src = history[historyIndex];
+            }
+        });
+
+        document.getElementById('redoBtn').addEventListener('click', () => {
+            if (historyIndex < history.length - 1) {
+                historyIndex++;
+                let img = new Image();
+                img.onload = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0);
+                };
+                img.src = history[historyIndex];
+            }
+        });
+
+        // Clear Canvas
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            saveState();
+        });
+
+        // Export PNG
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = 'canvas-art.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+    </script>
+</body>
+</html>
