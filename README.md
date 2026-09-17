@@ -2,11 +2,10 @@
 
 An interactive and feature-rich digital drawing canvas built for artists and web enthusiasts. Express your creativity right from your web browser with a clean, user-friendly interface.
 
-🌐 **Live Demo:** [Click Here to View the Project](https://sumaya-sadat07.github.io/Studio-Canvas-Pro/)
 
 ---
 
-## ✨ Features
+## Features:
 
 * **Interactive Drawing Canvas:** Smooth and responsive drawing capabilities using HTML5 Canvas API.
 * **Custom Tools:** Multiple brush styles, eraser tools, and size controls for flexible design options.
@@ -17,12 +16,12 @@ An interactive and feature-rich digital drawing canvas built for artists and web
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack:
 
 * **HTML5:** Structuring the canvas element and application layout.
 * **CSS3:** Custom styling, smooth animations, and responsive layout design.
 * **JavaScript (ES6+):** Handling canvas rendering logic, event listeners, drawing algorithms, and tool controls.
 
 
-## Live Demo
+## Live Demo:
 [Click here to view the project](https://sumaya-sadat07.github.io/Studio-Canvas-Pro/)
